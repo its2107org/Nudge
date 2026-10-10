@@ -2,6 +2,7 @@ import WidgetKit
 import SwiftUI
 import AppIntents
 import AlarmKit
+import ActivityKit
 
 @main
 struct NudgeWidgetBundle: WidgetBundle {

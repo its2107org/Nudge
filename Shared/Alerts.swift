@@ -1,5 +1,6 @@
 import Foundation
 import AlarmKit
+import ActivityKit
 import SwiftUI
 import UserNotifications
 
@@ -61,7 +62,7 @@ enum AlertScheduler {
         for reminder in reminders {
             await schedule(reminder, notificationCount: perReminder)
         }
-        center.setBadgeCount(reminders.filter(\.isDue).count)
+        try? await center.setBadgeCount(reminders.filter(\.isDue).count)
     }
 
     static func schedule(_ reminder: Reminder, notificationCount: Int) async {
