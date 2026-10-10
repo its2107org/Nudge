@@ -159,4 +159,20 @@ platform :ios do
       end
     end
   end
+  desc "Print TestFlight status: builds, their state, and testers"
+  lane :status do
+    api_key
+    app = Spaceship::ConnectAPI::App.find(BUNDLE_ID)
+    UI.user_error!("No App Store Connect app for #{BUNDLE_ID}") unless app
+    Spaceship::ConnectAPI::Build.all(app_id: app.id, limit: 5).each do |b|
+      detail = b.build_beta_detail
+      UI.message("BUILD #{b.version}: processing=#{b.processing_state} internal=#{detail&.internal_build_state} expired=#{b.expired} encryption=#{b.uses_non_exempt_encryption.inspect} minOS=#{b.min_os_version} uploaded=#{b.uploaded_date}")
+    end
+    app.get_beta_groups.each do |g|
+      UI.message("GROUP #{g.name}: internal=#{g.is_internal_group} allBuilds=#{g.has_access_to_all_builds}")
+      Spaceship::ConnectAPI::BetaTester.all(filter: { betaGroups: g.id }).each do |t|
+        UI.message("  TESTER state=#{t.beta_tester_state} invite=#{t.invite_type} devices=#{t.number_of_installed_devices.inspect}")
+      end
+    end
+  end
 end

@@ -16,3 +16,4 @@ jobs:
       - uses: actions/checkout@v5
       - run: bundle install
       - run: bundle exec fastlane testers
+      - run: bundle exec fastlane status
