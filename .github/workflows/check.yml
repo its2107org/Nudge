@@ -17,9 +17,8 @@ jobs:
           xcodegen generate
       - name: Build for simulator (no signing)
         run: |
-          set -o pipefail
           xcodebuild build -project Nudge.xcodeproj -scheme Nudge \
             -destination 'generic/platform=iOS Simulator' \
-            DEVELOPMENT_TEAM=ABCDE12345 CODE_SIGNING_ALLOWED=NO \
-            | grep -E "error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)|\*\*" || true
-          test ${PIPESTATUS[0]} -eq 0
+            DEVELOPMENT_TEAM=ABCDE12345 CODE_SIGNING_ALLOWED=NO > build.log 2>&1 && status=0 || status=$?
+          grep -E "error:|BUILD (SUCCEEDED|FAILED)" build.log | sort -u || true
+          exit $status
