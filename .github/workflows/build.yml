@@ -80,6 +80,9 @@ jobs:
       - name: Send to TestFlight
         run: bundle exec fastlane release
 
+      - name: Make sure you're a tester
+        run: bundle exec fastlane testers || echo "::warning::Tester setup step failed"
+
       - name: Keep build log
         if: always()
         uses: actions/upload-artifact@v6

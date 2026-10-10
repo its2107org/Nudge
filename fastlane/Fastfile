@@ -107,4 +107,40 @@ platform :ios do
       changelog: "Automatic build " + last_git_commit[:abbreviated_commit_hash]
     )
   end
+  desc "Make sure the owner is set up as a TestFlight tester (safe to repeat)"
+  lane :testers do
+    api_key
+    app = Spaceship::ConnectAPI::App.find(BUNDLE_ID)
+    UI.user_error!("No App Store Connect app for #{BUNDLE_ID}") unless app
+
+    group = app.get_beta_groups.find { |g| g.name == "Me" }
+    unless group
+      group = app.create_beta_group(group_name: "Me", is_internal_group: true, has_access_to_all_builds: true)
+      UI.success("Created internal TestFlight group 'Me' with automatic distribution")
+    end
+
+    existing = (group.fetch_beta_testers rescue []).map { |t| t.email.to_s.downcase }
+    users = Spaceship::ConnectAPI::User.all
+    UI.message("Found #{users.count} App Store Connect user(s)")
+    users.each do |user|
+      email = user.username.to_s
+      next if email.empty? || existing.include?(email.downcase)
+      Spaceship::ConnectAPI.post_beta_tester_assignment(
+        beta_group_ids: [group.id],
+        attributes: { email: email, firstName: user.first_name, lastName: user.last_name }
+      )
+      UI.success("Added a team member to the 'Me' TestFlight group")
+    end
+
+    # Give the newest build to the group too, in case it arrived before the group existed.
+    build = Spaceship::ConnectAPI::Build.all(app_id: app.id, sort: "-uploadedDate", limit: 1).first
+    if build
+      begin
+        build.add_beta_groups(beta_groups: [group])
+        UI.success("Newest build shared with the group")
+      rescue => e
+        UI.important("Could not share newest build yet (#{e.message}); automatic distribution will cover it")
+      end
+    end
+  end
 end

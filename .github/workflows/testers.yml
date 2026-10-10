@@ -1,0 +1,18 @@
+name: Set up TestFlight tester
+on:
+  workflow_dispatch:
+
+jobs:
+  testers:
+    runs-on: macos-26
+    env:
+      TEAMID: ${{ secrets.TEAMID }}
+      FASTLANE_KEY_ID: ${{ secrets.FASTLANE_KEY_ID }}
+      FASTLANE_ISSUER_ID: ${{ secrets.FASTLANE_ISSUER_ID }}
+      FASTLANE_KEY: ${{ secrets.FASTLANE_KEY }}
+      FASTLANE_SKIP_UPDATE_CHECK: "1"
+      FASTLANE_HIDE_CHANGELOG: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - run: bundle install
+      - run: bundle exec fastlane testers
