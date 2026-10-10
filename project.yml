@@ -1,0 +1,77 @@
+name: Nudge
+options:
+  bundleIdPrefix: com.nudge
+  deploymentTarget:
+    iOS: "26.1"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Manual
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  Nudge:
+    type: application
+    platform: iOS
+    sources:
+      - Nudge
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.$(DEVELOPMENT_TEAM).nudge
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: Nudge/Nudge.entitlements
+        INFOPLIST_FILE: Nudge/Info.plist
+    info:
+      path: Nudge/Info.plist
+      properties:
+        CFBundleDisplayName: Nudge
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSAlarmKitUsageDescription: Nudge rings like an alarm when a reminder is due, even when your phone is on silent.
+        NSSupportsLiveActivities: true
+        ITSAppUsesNonExemptEncryption: false
+        NudgeKeychainGroup: $(AppIdentifierPrefix)com.$(DEVELOPMENT_TEAM).nudge.shared
+    entitlements:
+      path: Nudge/Nudge.entitlements
+      properties:
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.$(DEVELOPMENT_TEAM).nudge.shared
+    dependencies:
+      - target: NudgeWidget
+  NudgeWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - NudgeWidget
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.$(DEVELOPMENT_TEAM).nudge.widget
+        CODE_SIGN_ENTITLEMENTS: NudgeWidget/NudgeWidget.entitlements
+        INFOPLIST_FILE: NudgeWidget/Info.plist
+    info:
+      path: NudgeWidget/Info.plist
+      properties:
+        CFBundleDisplayName: Nudge
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NudgeKeychainGroup: $(AppIdentifierPrefix)com.$(DEVELOPMENT_TEAM).nudge.shared
+    entitlements:
+      path: NudgeWidget/NudgeWidget.entitlements
+      properties:
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)com.$(DEVELOPMENT_TEAM).nudge.shared
+schemes:
+  Nudge:
+    build:
+      targets:
+        Nudge: all
+        NudgeWidget: all

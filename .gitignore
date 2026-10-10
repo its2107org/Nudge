@@ -1,0 +1,8 @@
+Nudge.xcodeproj/
+buildlog/
+*.ipa
+*.dSYM.zip
+*.mobileprovision
+fastlane/app_record_exists.txt
+fastlane/report.xml
+vendor/

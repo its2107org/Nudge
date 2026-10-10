@@ -1,0 +1,25 @@
+name: Check it builds
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select Xcode
+        run: sudo xcode-select --switch /Applications/Xcode_26.5.app/Contents/Developer
+      - name: Generate project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Build for simulator (no signing)
+        run: |
+          set -o pipefail
+          xcodebuild build -project Nudge.xcodeproj -scheme Nudge \
+            -destination 'generic/platform=iOS Simulator' \
+            DEVELOPMENT_TEAM=ABCDE12345 CODE_SIGNING_ALLOWED=NO \
+            | grep -E "error:|warning: .*deprecated|BUILD (SUCCEEDED|FAILED)|\*\*" || true
+          test ${PIPESTATUS[0]} -eq 0
